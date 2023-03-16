@@ -10,9 +10,11 @@ from nav_msgs.msg import Odometry
 from cv_bridge import CvBridge, CvBridgeError
 
 from TartanAIR.loader import getRootDir, getDataSequences, getDataLists
-rootDIR = getRootDir()
 
-def convertBags(_pathTartan, _pathBag, _bagName = '0x.bag'):
+rootDIR = getRootDir()
+global_start = datetime.datetime(year=2023, month=3, day=23, hour=23, minute=23, second=23)
+
+def convertBags(_pathTartan, _pathBag, _bagName = 'seq-0x.bag'):
 
     files_rgb_left, files_rgb_right, files_depth_left, poselist = getDataLists(dir=_pathTartan, skip=1)
 
@@ -29,7 +31,7 @@ def convertBags(_pathTartan, _pathBag, _bagName = '0x.bag'):
     bridge = CvBridge()
     bag = rosbag.Bag(_pathBag + _bagName, 'w')
 
-    st = datetime.datetime(year=2023, month=3, day=23, hour=23, minute=23, second=23)
+    st = global_start
     for i in range(imulist_t.shape[0]):
         # cTime = (st + datetime.timedelta(milliseconds=(i * delta_imu))).timestamp()
         imu = imulist_t[i]
@@ -83,7 +85,7 @@ def convertBags(_pathTartan, _pathBag, _bagName = '0x.bag'):
     bag.close()
 
 def convertPoseSequence(poses, offset = 0):
-    start_time = datetime.datetime(year=2022, month=2, day=22, hour=22, minute=22, second=22)
+    start_time = global_start
 
     initSecs = 2
     fps = 20
@@ -102,7 +104,7 @@ def convertPoseSequence(poses, offset = 0):
 
     times = np.zeros(total_frames)
     for i in range(total_frames):
-        print(i)
+        # print(i)
         times[i] = (start_time + datetime.timedelta(milliseconds=(i * delta_ms))).timestamp()
 
     times = times.reshape([-1, 1])
@@ -115,25 +117,57 @@ def convertPoseSequence(poses, offset = 0):
 
     return poselist_wTime, state_id
 
+def multiple_gen():
+    header = '# t x y z qx qy qz qw'
+    # scenarios = ['carwelding','office','neighborhood','oldtown']
+    scenarios = ['carwelding']
+    level = 'Easy'
+    for seq_name in scenarios:
+        paths = getDataSequences(root=rootDIR, scenario=seq_name, level=level, seq_num=-1)
+        for path in paths:
+            path_dirs = list(filter(None, path.split('/')))[::-1]
+            save_dir = Path(str(Path.home()) + '/Datasets/TartanAir_Bag/' + seq_name + '/'
+                            + path_dirs[1] + '/' + path_dirs[0] + '/')
+            save_dir.mkdir(parents=True, exist_ok=True)
+            files_rgb_left, files_rgb_right, files_depth_left, poselist = getDataLists(dir=path, skip=1)
+            poselist_wTime, data_ids = convertPoseSequence(poselist, offset=0)
+            # poselist_wTime, data_ids = (poselist, offset=offset)
+            np.savetxt(fname=save_dir._str + '/pose_gt.txt', X=poselist_wTime, header=header)
+            np.savetxt(fname=save_dir._str + '/data_id.txt', X=data_ids, fmt='%i', header='data index')
+            print('Saved at directory: ', save_dir._str)
+
+def multiple_bags_gen():
+    # scenarios = ['carwelding','office','neighborhood','oldtown']
+    scenarios = ['neighborhood']
+    level = 'Easy'
+    for seq_name in scenarios:
+        paths = getDataSequences(root=rootDIR, scenario=seq_name, level=level, seq_num=-1)
+        for path in paths:
+            path_dirs = list(filter(None, path.split('/')))[::-1]
+            save_dir = Path(str(Path.home()) + '/Datasets/TartanAir_Bag/' + seq_name + '/'
+                            + path_dirs[1] + '/' + path_dirs[0] + '/')
+            save_dir.mkdir(parents=True, exist_ok=True)
+            convertBags(path, save_dir._str+'/')
+
+
 if __name__ == "__main__":
     # fname = save_dir + 'pose_gt.txt'
     header = '# t x y z qx qy qz qw'
-    seq_name = 'office'
+    # seq_name = 'carwelding' 'office' 'neighborhood' 'oldtown'
+    seq_name = 'oldtown'
     level = 'Easy'
 
-    path = getDataSequences(root=rootDIR, scenario='office', level='Easy', seq_num=4)
+    # Single Gen
+    path = getDataSequences(root=rootDIR, scenario=seq_name, level='Easy', seq_num=0)
     path_dirs = list(filter(None, path.split('/')))[::-1]
     save_dir = Path(str(Path.home()) + '/Datasets/TartanAir_Bag/' + seq_name + '/' + path_dirs[1] + '/' + path_dirs[0] + '/')
     save_dir.mkdir(parents=True, exist_ok=True)
-    # if save_dir.exists():
 
     files_rgb_left, files_rgb_right, files_depth_left, poselist = getDataLists(dir=path, skip=1)
     poselist_wTime, data_ids = convertPoseSequence(poselist, offset=0)
+    # np.savetxt(fname = save_dir._str + '/pose_gt.txt', X=poselist_wTime, header=header)
+    # np.savetxt(fname = save_dir._str + '/data_id.txt', X=data_ids, fmt='%i', header='data index')
 
-    # poselist_wTime, data_ids = (poselist, offset=offset)
-
-    np.savetxt(fname = save_dir._str + '/pose_gt.txt', X=poselist_wTime, header=header)
-    np.savetxt(fname = save_dir._str + '/data_id.txt', X=data_ids, fmt='%i', header='data index')
 
     #   RUN OpenVINS
 

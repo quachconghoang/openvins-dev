@@ -34,6 +34,14 @@ def getDataSequences(root='', scenario='neighborhood', level='Easy', seq_num=0):
 
     _trajs = os.listdir(path_scr)
     _trajs.sort()
+
+    if seq_num == -1:
+        print('loading all trajectories at scenario: ', scenario)
+        _paths = []
+        for t in _trajs:
+            _paths.append(path_scr+t+'/')
+        return _paths
+
     if seq_num < len(_trajs):
         path_scr += (_trajs[seq_num]+'/')
         print('loading path: ',path_scr)

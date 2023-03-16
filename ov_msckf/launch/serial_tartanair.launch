@@ -1,7 +1,7 @@
 <launch>
 
     <!-- what config we are going to run (should match folder name) -->
-    <arg name="verbosity"   default="DEBUG" /> <!-- ALL, DEBUG, INFO, WARNING, ERROR, SILENT -->
+    <arg name="verbosity"   default="WARNING" /> <!-- ALL, DEBUG, INFO, WARNING, ERROR, SILENT -->
     <arg name="config"      default="tartanair_sim" /> <!-- euroc_mav, tum_vi, rpng_aruco -->
     <arg name="home_dir"    default="$(optenv HOME /home/hoangqc)" /> "
 <!--    <arg name="catkin_dir"  default="$(find ov_msckf)/../../" />-->
@@ -11,21 +11,33 @@
     <arg name="max_cameras" default="2" />
     <arg name="use_stereo"  default="true" />
     <arg name="bag_start"   default="0" /> <!-- v1-2: 0, mh1: 40, mh2: 35, mh3: 17.5, mh4-5: 15 -->
-    <arg name="dataset"     default="seasidetown_000" /> <!-- V1_01_easy, V1_02_medium, V2_02_medium -->
-<!--    neighborhood_000, office_004, carwelding_001, carwelding_002, oldtown_000-->
-    <arg name="bag"         default="$(arg home_dir)/Datasets/TartanAir_Bag/$(arg dataset).bag" />
-    <!--    <arg name="bag"         default="/media/patrick/RPNG FLASH 3/$(arg config)/$(arg dataset).bag" />-->
-<!--    <arg name="bag"         default="/datasets/$(arg config)/$(arg dataset).bag" />-->
+
+    <!--    neighborhood, office, carwelding, oldtown -->
+    <!--    dataset_office=(        "P000"  "P001"  "P002"  "P003"  "P004"  "P005"  "P006")-->
+    <!--    dataset_neighborhood=(  "P000:15"  "P001:6"  "P002"  "P003:11"  "P004"  "P005"  "P007"-->
+    <!--                            "P008"  "P009"  "P010"  "P012"  "P013"  "P014"  "P015"-->
+    <!--                            "P016"  "P017"  "P018"  "P019"  "P020"  "P021")-->
+    <!--    dataset_carwelding=(    "P001"  "P002"  "P004"  "P005"  "P006"  "P007")-->
+    <!--    dataset_oldtown=(       "P000"  "P001"  "P002"  "P004"  "P005"  "P007")-->
+
+
+    <!--    CONFIG TartanAir DATASET-->
+    <arg name="data_root"           default="/home/hoangqc/Datasets/TartanAir_Bag/" />
+    <arg name="data_scenario"       default="oldtown" />
+    <arg name="data_level"          default="Easy" />
+    <arg name="dataset"             default="P001" />
+    <arg name="data_folder"         default="$(arg data_root)/$(arg data_scenario)/$(arg data_level)/$(arg dataset)" />
+    <arg name="bag"                 default="$(arg data_folder)/seq-0x.bag" />
 
     <!-- saving trajectory path and timing information -->
     <arg name="dosave"      default="true" />
     <arg name="dotime"      default="false" />
-    <arg name="path_est"    default="$(arg home_dir)/catkin_ws/tmp/sim/$(arg dataset)/pose_est.txt" />
-    <arg name="path_time"   default="$(arg home_dir)/catkin_ws/tmp/sim/$(arg dataset)/pose_timing.txt" />
+    <arg name="path_est"    default="$(arg data_folder)/pose_est.txt" />
+    <arg name="path_time"   default="$(arg data_folder)/pose_timing.txt" />
 
     <!-- if we should viz the groundtruth -->
     <arg name="dolivetraj"  default="true" />
-    <arg name="path_gt"     default="$(arg home_dir)/catkin_ws/tmp/sim/$(arg dataset)/pose_gt.txt" />
+    <arg name="path_gt"     default="$(arg data_folder)/pose_gt.txt" />
 
 
     <!-- MASTER NODE! -->
