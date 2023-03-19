@@ -5,6 +5,10 @@ project(ov_core)
 # The OpenCV version needs to match the one used by cv_bridge otherwise you will get a segmentation fault!
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV 4 QUIET)
+
+find_package(CUDA REQUIRED)
+find_package(yaml-cpp REQUIRED)
+
 if (NOT OpenCV_FOUND)
     find_package(OpenCV 3 REQUIRED)
 endif ()
@@ -52,8 +56,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall -Wuninitialized -Wmaybe-uninit
 find_package(catkin QUIET COMPONENTS roscpp)
 find_package(ament_cmake QUIET)
 if (catkin_FOUND)
-    message(STATUS "ROS *1* version found, building ROS1.cmake")
-    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ROS1.cmake)
+    message(STATUS "ROS *1* version found, building ROS1_Nvidia.cmake")
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ROS1_Nvidia.cmake)
 elseif (ament_cmake_FOUND)
     message(STATUS "ROS *2* version found, building ROS2.cmake")
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ROS2.cmake)

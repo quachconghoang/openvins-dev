@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.3)
 
 # Find ROS build system
-find_package(catkin QUIET COMPONENTS roscpp rosbag sensor_msgs cv_bridge)
+find_package(catkin QUIET COMPONENTS roscpp rosbag sensor_msgs cv_bridge ov_superpoint)
 
 # Describe ROS project
 option(ENABLE_ROS "Enable or disable building with ROS (if it is found)" ON)
 if (catkin_FOUND AND ENABLE_ROS)
     add_definitions(-DROS_AVAILABLE=1)
     catkin_package(
-            CATKIN_DEPENDS roscpp rosbag sensor_msgs cv_bridge
+            CATKIN_DEPENDS roscpp rosbag sensor_msgs cv_bridge ov_superpoint
             INCLUDE_DIRS src/
             LIBRARIES ov_core_lib
     )
@@ -27,6 +27,8 @@ include_directories(
         ${EIGEN3_INCLUDE_DIR}
         ${Boost_INCLUDE_DIRS}
         ${catkin_INCLUDE_DIRS}
+        ${CUDA_INCLUDE_DIRS}
+        ${YAML_CPP_INCLUDE_DIR}
 )
 
 # Set link libraries used by all binaries
@@ -34,31 +36,11 @@ list(APPEND thirdparty_libraries
         ${Boost_LIBRARIES}
         ${OpenCV_LIBRARIES}
         ${catkin_LIBRARIES}
+        nvinfer
+        nvonnxparser
+        ${CUDA_LIBRARIES}
+        yaml-cpp
 )
-
-#TORCH HERE-WE-GO
-#set(CMAKE_PREFIX_PATH "~/local")
-find_package(Torch REQUIRED)
-if(TORCH_FOUND)
-#    set(CMAKE_CXX_STANDARD 14)
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
-    find_package( CUDA REQUIRED )
-    message(STATUS "Found CUDA ${CUDA_VERSION_STRING} at ${CUDA_TOOLKIT_ROOT_DIR}")
-    set(CUDA_NVCC_FLAGS "-gencode arch=compute_75,code=sm_75;-rdc=true;-use_fast_math")
-#    set(CUDA_NVCC_FLAGS "-gencode arch=compute_72,code=sm_72;-rdc=true;-use_fast_math") # Jetson AGX Xavier
-    include_directories(
-            ${CUDA_INCLUDE_DIRS}
-            ${TORCH_INCLUDE_DIRS})
-    list(APPEND thirdparty_libraries
-            ${TORCH_LIBRARIES})
-endif()
-
-#find_package(Torch REQUIRED)
-#if(TORCH_FOUND)
-#    include_directories(${TORCH_INCLUDE_DIRS})
-#    list(APPEND thirdparty_libraries ${TORCH_LIBRARIES})
-#endif()
-
 
 ##################################################
 # Make the core library
@@ -95,17 +77,17 @@ install(DIRECTORY src/
 # Make binary files!
 ##################################################
 
-#if (catkin_FOUND AND ENABLE_ROS)
-#
-#    add_executable(test_tracking src/test_tracking.cpp)
-#    target_link_libraries(test_tracking ov_core_lib ${thirdparty_libraries})
-#    install(TARGETS test_tracking
-#            ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#            LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#            RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#    )
-#
-#endif ()
+if (catkin_FOUND AND ENABLE_ROS)
+
+    add_executable(test_tracking src/test_tracking.cpp)
+    target_link_libraries(test_tracking ov_core_lib ${thirdparty_libraries})
+    install(TARGETS test_tracking
+            ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+            LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+            RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    )
+
+endif ()
 
 #add_executable(test_webcam src/test_webcam.cpp)
 #target_link_libraries(test_webcam ov_core_lib ${thirdparty_libraries})

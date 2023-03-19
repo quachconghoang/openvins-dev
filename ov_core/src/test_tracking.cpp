@@ -41,6 +41,8 @@
 #include "utils/opencv_yaml_parse.h"
 #include "utils/print.h"
 
+#include "super_point.h"
+
 using namespace ov_core;
 
 // Our feature extractor
