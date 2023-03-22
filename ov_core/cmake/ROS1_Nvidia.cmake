@@ -76,7 +76,7 @@ install(DIRECTORY src/
 ##################################################
 # Make binary files!
 ##################################################
-
+add_definitions(-w)
 if (catkin_FOUND AND ENABLE_ROS)
 
     add_executable(test_tracking src/test_tracking.cpp)

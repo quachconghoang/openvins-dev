@@ -10,29 +10,25 @@
     <!-- mono or stereo and what ros bag to play -->
     <arg name="max_cameras" default="2" />
     <arg name="use_stereo"  default="true" />
-    <arg name="bag_start"   default="0" /> <!-- v1-2: 0, mh1: 40, mh2: 35, mh3: 17.5, mh4-5: 15 -->
+    <arg name="bag_start"   default="6.2" /> <!-- v1-2: 0, mh1: 40, mh2: 35, mh3: 17.5, mh4-5: 15 -->
 
     <!--    neighborhood, office, carwelding, oldtown -->
-    <!--    dataset_office=(        "P000"  "P001"  "P002"  "P003"  "P004"  "P005"  "P006")-->
-    <!--    dataset_neighborhood=(  "P000:15"  "P001:6"  "P002"  "P003:11"  "P004"  "P005"  "P007"-->
-    <!--                            "P008"  "P009"  "P010"  "P012"  "P013"  "P014"  "P015"-->
-    <!--                            "P016"  "P017"  "P018"  "P019"  "P020"  "P021")-->
-    <!--    dataset_carwelding=(    "P001"  "P002"  "P004"  "P005"  "P006"  "P007")-->
-    <!--    dataset_oldtown=(       "P000"  "P001"  "P002"  "P004"  "P005"  "P007")-->
-
 
     <!--    CONFIG TartanAir DATASET-->
     <arg name="data_root"           default="/home/hoangqc/Datasets/TartanAir_Bag/" />
-    <arg name="data_scenario"       default="oldtown" />
+    <arg name="data_scenario"       default="office" />
     <arg name="data_level"          default="Easy" />
-    <arg name="dataset"             default="P001" />
+    <arg name="dataset"             default="P006" />
     <arg name="data_folder"         default="$(arg data_root)/$(arg data_scenario)/$(arg data_level)/$(arg dataset)" />
     <arg name="bag"                 default="$(arg data_folder)/seq-0x.bag" />
+
+    <arg name="track_bench_fps"     default="2.1" />
+    <arg name="track_bench_delay"   default="5.0" />
 
     <!-- saving trajectory path and timing information -->
     <arg name="dosave"      default="true" />
     <arg name="dotime"      default="false" />
-    <arg name="path_est"    default="$(arg data_folder)/pose_est.txt" />
+    <arg name="path_est"    default="$(arg data_folder)/stamped_traj_estimate.txt" />
     <arg name="path_time"   default="$(arg data_folder)/pose_timing.txt" />
 
     <!-- if we should viz the groundtruth -->
@@ -43,11 +39,15 @@
     <!-- MASTER NODE! -->
 <!--    <node name="ros1_serial_msckf" pkg="ov_msckf" type="ros1_serial_msckf" output="screen" clear_params="true" required="true" launch-prefix="gdb -ex run &#45;&#45;args">-->
     <node name="ros1_serial_msckf" pkg="ov_msckf" type="ros1_serial_msckf" output="screen" clear_params="true" required="true">
+<!--    <node name="ros1_serial_msckf_dev" pkg="ov_msckf" type="ros1_serial_msckf_dev" output="screen" clear_params="true" required="true">-->
 
         <!-- bag parameters -->
         <param name="path_bag"                 type="str"    value="$(arg bag)" />
         <param name="bag_start"                type="double" value="$(arg bag_start)" />
         <param name="bag_durr"                 type="int"    value="-1" />
+
+        <param name="track_bench_fps"            type="double" value="$(arg track_bench_fps)" />
+        <param name="track_bench_delay"          type="double" value="$(arg track_bench_delay)" />
 
         <!-- master configuration object -->
         <param name="verbosity"                 type="str"    value="$(arg verbosity)" />

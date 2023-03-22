@@ -1,24 +1,3 @@
-/*
- * OpenVINS: An Open Platform for Visual-Inertial Research
- * Copyright (C) 2018-2022 Patrick Geneva
- * Copyright (C) 2018-2022 Guoquan Huang
- * Copyright (C) 2018-2022 OpenVINS Contributors
- * Copyright (C) 2018-2019 Kevin Eckenhoff
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 #include <ros/ros.h>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
@@ -41,17 +20,17 @@ std::shared_ptr<ROS1Visualizer> viz;
 int main(int argc, char **argv) {
 
   // Ensure we have a path, if the user passes it then we should use it
-  std::string config_path = "unset_path_to_config.yaml";
+  std::string config_path = "/home/hoangqc/catkin_ov/src/openvins-dev/config/tartanair_sim/estimator_config.yaml";
   if (argc > 1) {
     config_path = argv[1];
   }
 
   // Launch our ros node
-  ros::init(argc, argv, "ros1_serial_msckf");
+  ros::init(argc, argv, "ros1_serial_msckf_dev");
   auto nh = std::make_shared<ros::NodeHandle>("~");
   nh->param<std::string>("config_path", config_path, config_path);
 
-  // Load the config
+    // Load the config
   auto parser = std::make_shared<ov_core::YamlParser>(config_path);
   parser->set_node_handler(nh);
 
@@ -108,7 +87,7 @@ int main(int argc, char **argv) {
 
   // Location of the ROS bag we want to read in
   std::string path_to_bag;
-  nh->param<std::string>("path_bag", path_to_bag, "/home/patrick/datasets/eth/V1_01_easy.bag");
+  nh->param<std::string>("path_bag", path_to_bag, "/home/hoangqc/Datasets/TartanAir_Bag/office/Easy/P000/seq-0x.bag");
   PRINT_DEBUG("ros bag path is: %s\n", path_to_bag.c_str());
 
   // Load groundtruth if we have it
@@ -289,10 +268,11 @@ int main(int argc, char **argv) {
       double timestamp = msg_images_current.at(0)->header.stamp.toSec();
       double time_delta = 1.0 / params.track_frequency;
 
-//        PRINT_WARNING("Bench = %f - %f\n",params.sim_bench_fps, params.sim_bench_delay);
-        if(sys->initialized() && ((timestamp-time_init.toSec()) > params.track_bench_delay) ) {
-            time_delta = 1.0/params.track_bench_fps; // 2fps
-        }
+      if(sys->initialized() && ((timestamp-time_init.toSec()) > 5.0) )
+      {
+//          PRINT_WARNING(RED "Time: %f \n", timestamp-time_init.toSec());
+//            time_delta = 1.0/2.1;
+      }
 
       if (camera_last_timestamp.find(0) == camera_last_timestamp.end() || timestamp >= camera_last_timestamp.at(0) + time_delta) {
         camera_last_timestamp[0] = timestamp;
@@ -336,6 +316,7 @@ int main(int argc, char **argv) {
       // Check if we should feed this into the system at the specified frequency
       double timestamp = msg_camera->header.stamp.toSec();
       double time_delta = 1.0 / params.track_frequency;
+
       if (camera_last_timestamp.find(smallest_cam) == camera_last_timestamp.end() ||
           timestamp >= camera_last_timestamp.at(smallest_cam) + time_delta) {
         camera_last_timestamp[smallest_cam] = timestamp;

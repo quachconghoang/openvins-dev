@@ -123,6 +123,14 @@ if (catkin_FOUND AND ENABLE_ROS)
             RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
     )
 
+     add_executable(ros1_serial_msckf_dev src/ros1_serial_msckf_dev.cpp)
+     target_link_libraries(ros1_serial_msckf_dev ov_msckf_lib ${thirdparty_libraries})
+     install(TARGETS ros1_serial_msckf_dev
+             ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+             LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+             RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+             )
+
 endif ()
 
  add_executable(run_simulation src/run_simulation.cpp)

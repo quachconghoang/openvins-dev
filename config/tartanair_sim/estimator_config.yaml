@@ -88,7 +88,7 @@ grid_x: 20
 grid_y: 20
 min_px_dist: 15
 knn_ratio: 0.70
-track_frequency: 21.0
+track_frequency: 21
 downsample_cameras: false
 multi_threading: false
 histogram_method: "HISTOGRAM" # NONE, HISTOGRAM, CLAHE

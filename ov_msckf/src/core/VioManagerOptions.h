@@ -380,6 +380,10 @@ struct VioManagerOptions {
       parser->parse_config("grid_x", grid_x);
       parser->parse_config("grid_y", grid_y);
       parser->parse_config("min_px_dist", min_px_dist);
+
+      parser->parse_config("track_bench_fps", track_bench_fps);
+      parser->parse_config("track_bench_delay", track_bench_delay);
+
       std::string histogram_method_str = "HISTOGRAM";
       parser->parse_config("histogram_method", histogram_method_str);
       if (histogram_method_str == "NONE") {
@@ -412,6 +416,8 @@ struct VioManagerOptions {
     PRINT_DEBUG("  - hist method: %d\n", (int)histogram_method);
     PRINT_DEBUG("  - knn ratio: %.3f\n", knn_ratio);
     PRINT_DEBUG("  - track frequency: %.1f\n", track_frequency);
+      PRINT_DEBUG("  - track bench delay: %.1f\n", track_bench_delay);
+      PRINT_DEBUG("  - track bench fps: %.1f\n", track_bench_fps);
     featinit_options.print(parser);
   }
 
@@ -433,6 +439,8 @@ struct VioManagerOptions {
   /// Path to the trajectory we will b-spline and simulate on. Should be time(s),pos(xyz),ori(xyzw) format.
   std::string sim_traj_path = "src/open_vins/ov_data/sim/udel_gore.txt";
   std::string sim_imu_save_path = "src/open_vins/ov_data/sim/imu.txt";
+  double track_bench_fps = 20;
+  double track_bench_delay = 5.0;
 
   /// We will start simulating after we have moved this much along the b-spline. This prevents static starts as we init from groundtruth in
   /// simulation.
