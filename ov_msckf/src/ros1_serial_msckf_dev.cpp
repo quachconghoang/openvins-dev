@@ -16,11 +16,15 @@ using namespace ov_msckf;
 std::shared_ptr<VioManager> sys;
 std::shared_ptr<ROS1Visualizer> viz;
 
+#define kDEFAULT_CONFIG_PATH    "/home/hoangqc/catkin_ov/src/openvins-dev/config/tartanair_sim/estimator_config.yaml"
+#define kDEFAULT_BAG_FILE       "/home/hoangqc/Datasets/TartanAir_Bag/office/Easy/P004/seq-0x.bag"
+#define kDEFAULT_GT_FILE        "/home/hoangqc/Datasets/TartanAir_Bag/office/Easy/P004/pose_gt.txt"
+
 // Main function
 int main(int argc, char **argv) {
 
   // Ensure we have a path, if the user passes it then we should use it
-  std::string config_path = "/home/hoangqc/catkin_ov/src/openvins-dev/config/tartanair_sim/estimator_config.yaml";
+  std::string config_path = kDEFAULT_CONFIG_PATH;
   if (argc > 1) {
     config_path = argv[1];
   }
@@ -29,6 +33,12 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "ros1_serial_msckf_dev");
   auto nh = std::make_shared<ros::NodeHandle>("~");
   nh->param<std::string>("config_path", config_path, config_path);
+
+  // Static Config by HoangQC
+  bool  dolivetraj = true;
+  nh->param<bool>("dolivetraj", dolivetraj, dolivetraj);
+  std::string path_gt_file = kDEFAULT_GT_FILE;
+  nh->param<std::string>("path_gt", path_gt_file, path_gt_file);
 
     // Load the config
   auto parser = std::make_shared<ov_core::YamlParser>(config_path);
@@ -87,7 +97,7 @@ int main(int argc, char **argv) {
 
   // Location of the ROS bag we want to read in
   std::string path_to_bag;
-  nh->param<std::string>("path_bag", path_to_bag, "/home/hoangqc/Datasets/TartanAir_Bag/office/Easy/P000/seq-0x.bag");
+  nh->param<std::string>("path_bag", path_to_bag, kDEFAULT_BAG_FILE);
   PRINT_DEBUG("ros bag path is: %s\n", path_to_bag.c_str());
 
   // Load groundtruth if we have it
@@ -268,11 +278,10 @@ int main(int argc, char **argv) {
       double timestamp = msg_images_current.at(0)->header.stamp.toSec();
       double time_delta = 1.0 / params.track_frequency;
 
-      if(sys->initialized() && ((timestamp-time_init.toSec()) > 5.0) )
-      {
-//          PRINT_WARNING(RED "Time: %f \n", timestamp-time_init.toSec());
-//            time_delta = 1.0/2.1;
-      }
+      // HOANGQC - HACK SPEED
+//      if(sys->initialized() && ((timestamp-time_init.toSec()) > params.track_bench_delay) ) {
+//          time_delta = 1.0/params.track_bench_fps; // 2fps
+//      }
 
       if (camera_last_timestamp.find(0) == camera_last_timestamp.end() || timestamp >= camera_last_timestamp.at(0) + time_delta) {
         camera_last_timestamp[0] = timestamp;

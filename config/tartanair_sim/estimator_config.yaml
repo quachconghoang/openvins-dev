@@ -1,13 +1,6 @@
 %YAML:1.0 # need to specify the file type at the top!
 
-# ------------- NOTE --------------
-# https://github.com/castacks/tartanair_tools/blob/master/data_type.md
-# The unit of the depth value is meter.
-# The baseline between the left and right cameras is 0.25m.
-# Disparity = 80.0 / depth
-
-
-verbosity: "WARNING" # ALL, DEBUG, INFO, WARNING, ERROR, SILENT
+verbosity: "ERROR" # ALL, DEBUG, INFO, WARNING, ERROR, SILENT
 
 use_fej: true # if we should use first-estimate Jacobians (enable for good consistency)
 use_imuavg: true # for our discrete integration, if we should average sequential IMU measurements to "smooth" it
@@ -15,6 +8,11 @@ use_rk4int: true # if rk4 integration should be used (overrides imu averaging)
 
 use_stereo: true # if we have more than 1 camera, if we should try to track stereo constraints
 max_cameras: 2
+
+# Magic_code
+track_bench_fps: 20.1
+track_bench_delay: 5.0
+# path_bag: "/home/hoangqc/Datasets/TartanAir_Bag/office/Easy/P004/seq-0x.bag"
 
 calib_cam_extrinsics: false
 calib_cam_intrinsics: false
