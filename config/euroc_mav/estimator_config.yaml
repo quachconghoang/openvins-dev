@@ -79,9 +79,9 @@ filepath_gt: "/tmp/ov_groundtruth.txt"
 use_klt: true
 num_pts: 200
 fast_threshold: 20
-grid_x: 20
-grid_y: 20
-min_px_dist: 15
+grid_x: 5
+grid_y: 5
+min_px_dist: 10
 knn_ratio: 0.70
 track_frequency: 21.0
 downsample_cameras: false # will downsample image in half if true

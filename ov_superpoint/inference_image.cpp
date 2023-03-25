@@ -1,14 +1,50 @@
-//
-// Created by haoyuefan on 2021/9/22.
-//
-
 #include <memory>
 #include <chrono>
 #include "utils.h"
 #include "super_glue.h"
 #include "super_point.h"
 
-int main(int argc, char** argv){
+//#include <opencv2/imgproc/imgproc.hpp>
+//#include <vpi/OpenCVInterop.hpp>
+//#include <vpi/Array.h>
+//#include <vpi/Image.h>
+//#include <vpi/Pyramid.h>
+//#include <vpi/Status.h>
+//#include <vpi/Stream.h>
+//#include <vpi/algo/ConvertImageFormat.h>
+//#include <vpi/algo/GaussianPyramid.h>
+//#include <vpi/algo/HarrisCorners.h>
+//#include <vpi/algo/OpticalFlowPyrLK.h>
+
+using namespace cv;
+
+int main()
+{
+    std::string folder = "/home/hoangqc/Datasets/TartanAir/office/Easy/P004/";
+    int step = 5;
+    cv::Mat img_l, img_r;
+    std::vector<std::string> image_left, image_right;
+    GetFileNames(folder+"image_left", image_left);
+    GetFileNames(folder+"image_right", image_right);
+    for(int i = 0; i< image_left.size()/step;i++)
+    {
+//        std::cout << image_left[i] << " - " << image_right[i] << std::endl;
+        img_l = cv::imread(image_left[i*step], IMREAD_GRAYSCALE);
+        img_r = cv::imread(image_left[i*step], IMREAD_GRAYSCALE);
+        imshow("img", img_l);
+        if (waitKey() == 'q')
+            break;
+    }
+
+/* Task list:
+ * - Major: Implement superpoint - sinkhorn - hungarian
+ * - Minor: Implenent PnP-solver ? - Stereo
+ * */
+    cv::destroyAllWindows();
+    return 0;
+}
+
+int main_old(int argc, char** argv){
   if(argc != 5){
     std::cerr << "./superpointglue_image config_path model_dir first_image_absolutely_path second_image_absolutely_path" << std::endl;
     return 0;

@@ -1,6 +1,6 @@
 %YAML:1.0 # need to specify the file type at the top!
 
-verbosity: "ERROR" # ALL, DEBUG, INFO, WARNING, ERROR, SILENT
+verbosity: "DEBUG" # ALL, DEBUG, INFO, WARNING, ERROR, SILENT
 
 use_fej: true # if we should use first-estimate Jacobians (enable for good consistency)
 use_imuavg: true # for our discrete integration, if we should average sequential IMU measurements to "smooth" it
@@ -82,14 +82,14 @@ filepath_gt: "/tmp/ov_groundtruth.txt"
 use_klt: true
 num_pts: 250
 fast_threshold: 15
-grid_x: 20
-grid_y: 20
-min_px_dist: 15
+grid_x: 8
+grid_y: 8
+min_px_dist: 10
 knn_ratio: 0.70
 track_frequency: 21
 downsample_cameras: false
 multi_threading: false
-histogram_method: "HISTOGRAM" # NONE, HISTOGRAM, CLAHE
+histogram_method: "NONE" # NONE, HISTOGRAM, CLAHE
 
 # aruco tag tracker for the system
 # DICT_6X6_1000 from https://chev.me/arucogen/

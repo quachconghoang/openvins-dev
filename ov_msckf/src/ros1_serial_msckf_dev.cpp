@@ -279,9 +279,9 @@ int main(int argc, char **argv) {
       double time_delta = 1.0 / params.track_frequency;
 
       // HOANGQC - HACK SPEED
-//      if(sys->initialized() && ((timestamp-time_init.toSec()) > params.track_bench_delay) ) {
-//          time_delta = 1.0/params.track_bench_fps; // 2fps
-//      }
+      if(sys->initialized() && ((timestamp-time_init.toSec()) > params.track_bench_delay) ) {
+          time_delta = 1.0/params.track_bench_fps; // 2fps
+      }
 
       if (camera_last_timestamp.find(0) == camera_last_timestamp.end() || timestamp >= camera_last_timestamp.at(0) + time_delta) {
         camera_last_timestamp[0] = timestamp;

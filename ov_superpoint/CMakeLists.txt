@@ -9,10 +9,11 @@ add_definitions(-w)
 #add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty/tensorrtbuffer)
 
 
-find_package(OpenCV 4.2 REQUIRED)
+find_package(OpenCV 4 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(CUDA REQUIRED)
 find_package(yaml-cpp REQUIRED)
+#find_package(vpi 2 REQUIRED)
 
 catkin_package(
         CATKIN_DEPENDS roscpp rosbag sensor_msgs cv_bridge
@@ -39,12 +40,13 @@ add_library(${PROJECT_NAME}_lib SHARED
 )
 
 target_link_libraries(${PROJECT_NAME}_lib
-  nvinfer
-  nvonnxparser
-  ${OpenCV_LIBRARIES}
-  ${CUDA_LIBRARIES}
-  yaml-cpp
-  tensorrtbuffer
+      nvinfer
+      nvonnxparser
+      ${OpenCV_LIBRARIES}
+      ${CUDA_LIBRARIES}
+      yaml-cpp
+      tensorrtbuffer
+#        vpi
 )
 
 add_executable(${PROJECT_NAME}_image inference_image.cpp)

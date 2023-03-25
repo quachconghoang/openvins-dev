@@ -87,6 +87,14 @@ if (catkin_FOUND AND ENABLE_ROS)
             RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
     )
 
+    add_executable(test_tracking_dl src/test_tracking_dl.cpp)
+    target_link_libraries(test_tracking_dl ov_core_lib ${thirdparty_libraries})
+    install(TARGETS test_tracking
+            ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+            LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+            RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+            )
+
 endif ()
 
 #add_executable(test_webcam src/test_webcam.cpp)

@@ -22,7 +22,7 @@
     <arg name="data_folder"         default="$(arg data_root)/$(arg data_scenario)/$(arg data_level)/$(arg dataset)" />
     <arg name="bag"                 default="$(arg data_folder)/seq-0x.bag" />
 
-    <arg name="track_bench_fps"     default="20.1" />
+    <arg name="track_bench_fps"     default="2.1" />
     <arg name="track_bench_delay"   default="5.0" />
 
     <!-- saving trajectory path and timing information -->
