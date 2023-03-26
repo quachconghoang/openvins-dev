@@ -21,20 +21,50 @@ using namespace cv;
 int main()
 {
     std::string folder = "/home/hoangqc/Datasets/TartanAir/office/Easy/P004/";
+    std::string config_path = "/home/hoangqc/Datasets/Weights/config.yaml";
+    std::string model_dir = "/home/hoangqc/Datasets/Weights/";
+
+    Configs configs(config_path, model_dir);
+
     int step = 5;
     cv::Mat img_l, img_r;
     std::vector<std::string> image_left, image_right;
     GetFileNames(folder+"image_left", image_left);
     GetFileNames(folder+"image_right", image_right);
-    for(int i = 0; i< image_left.size()/step;i++)
-    {
-//        std::cout << image_left[i] << " - " << image_right[i] << std::endl;
-        img_l = cv::imread(image_left[i*step], IMREAD_GRAYSCALE);
-        img_r = cv::imread(image_left[i*step], IMREAD_GRAYSCALE);
-        imshow("img", img_l);
-        if (waitKey() == 'q')
-            break;
+
+    img_l = cv::imread(image_left[160], IMREAD_GRAYSCALE);
+    img_r = cv::imread(image_right[160], IMREAD_GRAYSCALE);
+
+
+    std::cout << "First image size: " << img_l.cols << "x" << img_l.rows << std::endl;
+    std::cout << "Second image size: " << img_r.cols << "x" << img_r.rows << std::endl;
+
+    std::cout << "Building inference engine......" << std::endl;
+    auto superpoint = std::make_shared<SuperPoint>(configs.superpoint_config);
+    std::cout << configs.superpoint_config.onnx_file << std::endl << configs.superglue_config.onnx_file << std::endl;
+    if (!superpoint->build()){
+        std::cerr << "Error in SuperPoint building engine. Please check your onnx model path." << std::endl;
+        return 0;
     }
+
+//    auto superglue = std::make_shared<SuperGlue>(configs.superglue_config);
+//    if (!superglue->build()){
+//        std::cerr << "Error in SuperGlue building engine. Please check your onnx model path." << std::endl;
+//        return 0;
+//    }
+
+    std::cout << "SuperPoint and SuperGlue inference engine build success." << std::endl;
+
+//    for(int i = 0; i< image_left.size()/step;i++)
+//    {
+//
+//        img_l = cv::imread(image_left[i*step], IMREAD_GRAYSCALE);
+//        img_r = cv::imread(image_right[i*step], IMREAD_GRAYSCALE);
+//        imshow("img_l", img_l);
+//        imshow("img_r", img_r);
+//        if (waitKey() == 'q')
+//            break;
+//    }
 
 /* Task list:
  * - Major: Implement superpoint - sinkhorn - hungarian
