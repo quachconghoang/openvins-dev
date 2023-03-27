@@ -19,6 +19,11 @@ SuperPoint::SuperPoint(SuperPointConfig super_point_config)
 
 bool SuperPoint::build() {
     if(deserialize_engine()){
+        if (!context_) {
+            context_ = TensorRTUniquePtr<nvinfer1::IExecutionContext>(engine_->createExecutionContext());
+            if (!context_) return false;
+        }
+//        std::cout << "Init context \n";
         return true;
     }
     auto builder = TensorRTUniquePtr<nvinfer1::IBuilder>(nvinfer1::createInferBuilder(gLogger.getTRTLogger()));
@@ -77,9 +82,7 @@ bool SuperPoint::build() {
 
     if (!context_) {
         context_ = TensorRTUniquePtr<nvinfer1::IExecutionContext>(engine_->createExecutionContext());
-        if (!context_) {
-            return false;
-        }
+        if (!context_) return false;
     }
 
     ASSERT(network->getNbInputs() == 1);
@@ -110,6 +113,12 @@ bool SuperPoint::construct_network(TensorRTUniquePtr<nvinfer1::IBuilder> &builde
 
 
 bool SuperPoint::infer(const cv::Mat &image, Eigen::Matrix<double, 259, Eigen::Dynamic> &features) {
+//    if (!context_) {
+//        context_ = TensorRTUniquePtr<nvinfer1::IExecutionContext>(engine_->createExecutionContext());
+//        if (!context_) {
+//            return false;
+//        }
+//    }
     
     assert(engine_->getNbBindings() == 3);
 
