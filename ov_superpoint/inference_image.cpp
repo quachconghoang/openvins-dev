@@ -3,20 +3,13 @@
 #include "utils.h"
 #include "super_glue.h"
 #include "super_point.h"
+#include "Hungarian.h"
 
-//#include <opencv2/imgproc/imgproc.hpp>
-//#include <vpi/OpenCVInterop.hpp>
-//#include <vpi/Array.h>
-//#include <vpi/Image.h>
-//#include <vpi/Pyramid.h>
-//#include <vpi/Status.h>
-//#include <vpi/Stream.h>
-//#include <vpi/algo/ConvertImageFormat.h>
-//#include <vpi/algo/GaussianPyramid.h>
-//#include <vpi/algo/HarrisCorners.h>
-//#include <vpi/algo/OpticalFlowPyrLK.h>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core/eigen.hpp>
 
 using namespace cv;
+using namespace std;
 
 int main()
 {
@@ -33,10 +26,6 @@ int main()
     GetFileNames(folder+"image_right", image_right);
     image0 = cv::imread(image_left[160], IMREAD_GRAYSCALE);
     image1 = cv::imread(image_left[180], IMREAD_GRAYSCALE);
-//    img_l = cv::imread(image_left[160], IMREAD_GRAYSCALE);
-//    img_r = cv::imread(image_right[160], IMREAD_GRAYSCALE);
-//    std::cout << "First image size: " << img_l.cols << "x" << img_l.rows << std::endl;
-//    std::cout << "Second image size: " << img_r.cols << "x" << img_r.rows << std::endl;
 
     std::cout << "Building inference engine......" << std::endl;
     auto superpoint = std::make_shared<SuperPoint>(configs.superpoint_config);
@@ -54,20 +43,10 @@ int main()
 
     std::cout << "SuperPoint and SuperGlue inference engine build success." << std::endl;
     Eigen::Matrix<double, 259, Eigen::Dynamic> feature_points0, feature_points1;
-    std::vector<cv::DMatch> superglue_matches;
-    std::cout << "SuperPoint and SuperGlue test." << std::endl;
-    std::cout << "---------------------------------------------------------" << std::endl;
-    if(!superpoint->infer(image0, feature_points0)){
-        std::cerr << "Failed when extracting features from first image." << std::endl;
-        return 0;
-    }
-    if(!superpoint->infer(image1, feature_points1)){
-        std::cerr << "Failed when extracting features from second image." << std::endl;
-        return 0;
-    }
-    superglue->matching_points(feature_points0, feature_points1, superglue_matches);
 
-    cv::Mat match_image;
+    superpoint->infer(image0, feature_points0);
+    superpoint->infer(image1, feature_points1);
+
     std::vector<cv::KeyPoint> keypoints0, keypoints1;
     for(size_t i = 0; i < feature_points0.cols(); ++i){
         double score = feature_points0(0, i);
@@ -81,26 +60,64 @@ int main()
         double y = feature_points1(2, i);
         keypoints1.emplace_back(x, y, 8, -1, score);
     }
-    cv::drawMatches(image0, keypoints0, image1, keypoints1, superglue_matches, match_image);
 
+    Eigen::Matrix<double,Eigen::Dynamic, 256> fp0 = feature_points0.block(3, 0, 256, feature_points0.cols()).transpose();
+    Eigen::Matrix<double,Eigen::Dynamic, 256> fp1 = feature_points1.block(3, 0, 256, feature_points1.cols()).transpose();
+//    cout << fp0.rows() << fp0.cols();
+
+    cv::Mat desc0, desc1;
+    cv::eigen2cv(fp0, desc0);
+    cv::eigen2cv(fp1, desc1);
+
+    int num_src = feature_points0.cols();
+    int num_tar = feature_points1.cols();
+    Mat norm_self_0 = Mat::zeros(cv::Size(num_src, num_src), CV_64FC1);
+    Mat norm_self_1 = Mat::zeros(cv::Size(num_tar, num_tar), CV_64FC1);
+    Mat norm_cross = Mat::zeros(num_src, num_tar, CV_64FC1);
+
+    for(int i=0; i<num_src; i++){
+        for(int j=0; j<num_src; j++){
+            norm_self_0.at<double>(i,j) =cv::norm(desc0.row(i),desc0.row(j),NORM_L2);
+        }}
+
+    for(int i=0; i<num_tar; i++){
+        for(int j=0; j<num_tar; j++){
+            norm_self_1.at<double>(i,j) =cv::norm(desc1.row(i),desc1.row(j),NORM_L2);
+        }}
+
+    vector<vector<double>> cost_matrix = vector<vector<double> >(num_src, vector<double>(num_tar));
+
+    for(int i=0; i<num_src; i++){
+        for(int j=0; j<num_tar; j++){
+            double rs = cv::norm(desc0.row(i),desc1.row(j),NORM_L2);
+//            norm_cross.at<double>(i,j) = rs;
+            cost_matrix[i][j] = rs;
+        }
+    }
+//    norm_cross = cv::Mat(num_src,num_tar,CV_64FC1, cost_matrix.data());
+//    superglue->matching_points(feature_points0, feature_points1, superglue_matches);
+
+    HungarianAlgorithm HungAlgo;
+    vector<int> assignment;
+    double cost = HungAlgo.Solve(cost_matrix, assignment);
+    std::vector<cv::DMatch> hungarian_matches;
+
+    for (int i=0; i < assignment.size(); i++){
+        int tar_id = assignment[i];
+        if(tar_id != -1){
+            hungarian_matches.push_back(DMatch(i,tar_id,cost_matrix[i][tar_id]));
+        }
+    }
+
+    cv::Mat match_image;
+    cv::drawMatches(image0, keypoints0, image1, keypoints1, hungarian_matches, match_image);
     cv::imshow("match", match_image);
     cv::waitKey();
-
-//    for(int i = 0; i< image_left.size()/step;i++)
-//    {
-//
-//        img_l = cv::imread(image_left[i*step], IMREAD_GRAYSCALE);
-//        img_r = cv::imread(image_right[i*step], IMREAD_GRAYSCALE);
-//        imshow("img_l", img_l);
-//        imshow("img_r", img_r);
-//        if (waitKey() == 'q')
-//            break;
-//    }
 
 /* Task list:
  * - Major: Implement superpoint - sinkhorn - hungarian
  * - Minor: Implenent PnP-solver ? - Stereo
  * */
-    cv::destroyAllWindows();
+//    cv::destroyAllWindows();
     return 0;
 }

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 project(ov_superpoint)
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_BUILD_TYPE "release")
+#set(CMAKE_BUILD_TYPE "release")
 add_definitions(-w)
 
 #add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty/tensorrtbuffer)
@@ -35,8 +35,9 @@ add_library(tensorrtbuffer SHARED
 
 
 add_library(${PROJECT_NAME}_lib SHARED
-  src/super_point.cpp
-  src/super_glue.cpp
+        src/super_point.cpp
+        src/super_glue.cpp
+        src/Hungarian.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_lib
