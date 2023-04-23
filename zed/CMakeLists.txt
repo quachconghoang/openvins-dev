@@ -54,6 +54,7 @@ endif()
 option(BUILD_VIDEO      "Build the ZED Open Capture Video Modules (only for Linux)"   ON)
 option(BUILD_SENSORS    "Build the ZED Open Capture Sensors Modules"                  ON)
 option(BUILD_EXAMPLES   "Build the ZED Open Capture examples"                         ON)
+option(BUILD_APP        "Build the ZED Open Capture App"                              ON)
 option(DEBUG_CAM_REG    "Add functions to log the values of the registers of camera"  OFF)
 
 ############################################################################
@@ -157,6 +158,7 @@ if(BUILD_EXAMPLES)
         ##### OpenCV is required
         find_package(OpenCV REQUIRED)
         include_directories(${OpenCV_INCLUDE_DIRS})
+        include_directories( ${PROJECT_SOURCE_DIR}/examples/include)
 
         ##### Video Example
         set(VIDEO_EXAMPLE ${PROJECT_NAME}_video_example)
@@ -171,94 +173,6 @@ if(BUILD_EXAMPLES)
             RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
         )
 
-        ##### Multi-camera Video Example
-        set(MULTICAM_VIDEO_EXAMPLE ${PROJECT_NAME}_multicam_video_example)
-        add_executable(${MULTICAM_VIDEO_EXAMPLE} "${PROJECT_SOURCE_DIR}/examples/zed_oc_multi_video_example.cpp")
-        set_target_properties(${MULTICAM_VIDEO_EXAMPLE} PROPERTIES PREFIX "")
-        set_property(TARGET ${MULTICAM_VIDEO_EXAMPLE} PROPERTY POSITION_INDEPENDENT_CODE ON)
-        target_link_libraries(${MULTICAM_VIDEO_EXAMPLE}
-          ${PROJECT_NAME}
-          ${OpenCV_LIBS}
-        )
-        install(TARGETS ${MULTICAM_VIDEO_EXAMPLE}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-        )
-
-
-
-        ##### Control Example
-        set(CONTROL_EXAMPLE ${PROJECT_NAME}_control_example)
-        add_executable(${CONTROL_EXAMPLE} "${PROJECT_SOURCE_DIR}/examples/zed_oc_control_example.cpp")
-        set_target_properties(${CONTROL_EXAMPLE} PROPERTIES PREFIX "")
-        target_link_libraries(${CONTROL_EXAMPLE}
-          ${PROJECT_NAME}
-          ${OpenCV_LIBS}
-        )
-        install(TARGETS ${CONTROL_EXAMPLE}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-        )
-
-        ##### Rectify Example
-        set(RECTIFY_EXAMPLE ${PROJECT_NAME}_rectify_example)
-        include_directories( ${PROJECT_SOURCE_DIR}/examples/include)
-        add_executable(${RECTIFY_EXAMPLE} "${PROJECT_SOURCE_DIR}/examples/zed_oc_rectify_example.cpp")
-        set_target_properties(${RECTIFY_EXAMPLE} PROPERTIES PREFIX "")
-        target_link_libraries(${RECTIFY_EXAMPLE}
-          ${PROJECT_NAME}
-          ${OpenCV_LIBS}
-        )
-        install(TARGETS ${RECTIFY_EXAMPLE}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-        )
-
-        ##### Depth Example
-        find_package(OpenMP)
-
-        set(DEPTH_EXAMPLE ${PROJECT_NAME}_depth_example)
-        include_directories( ${PROJECT_SOURCE_DIR}/examples/include)
-        add_executable(${DEPTH_EXAMPLE} "${PROJECT_SOURCE_DIR}/examples/zed_oc_depth_example.cpp")
-        set_target_properties(${DEPTH_EXAMPLE} PROPERTIES PREFIX "")
-
-        if(OpenMP_CXX_FOUND)
-            include_directories(${OpenMP_CXX_INCLUDE_DIRS})
-            SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-            target_link_libraries(${DEPTH_EXAMPLE}
-              OpenMP::OpenMP_CXX
-              ${PROJECT_NAME}
-              ${OpenCV_LIBS}
-            )
-        else()
-            target_link_libraries(${DEPTH_EXAMPLE}
-              ${PROJECT_NAME}
-              ${OpenCV_LIBS}
-            )
-        endif()
-
-        ##### Depth Tune Stereo
-        set(STEREO_TUNE_APP ${PROJECT_NAME}_depth_tune_stereo)
-        include_directories( ${PROJECT_SOURCE_DIR}/examples/include)
-        add_executable(${STEREO_TUNE_APP} "${PROJECT_SOURCE_DIR}/examples/tools/zed_oc_tune_stereo_sgbm.cpp")
-        set_target_properties(${STEREO_TUNE_APP} PROPERTIES PREFIX "")
-        target_link_libraries(${STEREO_TUNE_APP}
-          ${PROJECT_NAME}
-          ${OpenCV_LIBS}
-        )
-        install(TARGETS ${STEREO_TUNE_APP}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-        )
-
-        if(DEBUG_CAM_REG)
-            ##### Video with AEG/AGC registers log
-            add_executable(${PROJECT_NAME}_video_reg_log "${PROJECT_SOURCE_DIR}/examples/zed_oc_video_reg_log.cpp")
-            set_target_properties(${PROJECT_NAME}_video_reg_log PROPERTIES PREFIX "")
-            target_link_libraries(${PROJECT_NAME}_video_reg_log
-              ${PROJECT_NAME}
-              ${OpenCV_LIBS}
-            )
-            install(TARGETS ${PROJECT_NAME}_video_reg_log
-                RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-            )
-        endif()
     endif()
 
     if(BUILD_SENSORS)
@@ -267,7 +181,7 @@ if(BUILD_EXAMPLES)
         ##### Sensors Example
         add_executable(${PROJECT_NAME}_sensors_example "${PROJECT_SOURCE_DIR}/examples/zed_oc_sensors_example.cpp")
         set_target_properties(${PROJECT_NAME}_sensors_example PROPERTIES PREFIX "")
-        target_link_libraries(${PROJECT_NAME}_sensors_example          
+        target_link_libraries(${PROJECT_NAME}_sensors_example
           ${PROJECT_NAME}
         )
         install(TARGETS ${PROJECT_NAME}_sensors_example
@@ -290,4 +204,16 @@ if(BUILD_EXAMPLES)
             RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
         )
     endif()
+
+
+    if(BUILD_APP)
+        add_executable(${PROJECT_NAME}_recorder "${PROJECT_SOURCE_DIR}/examples/zed_oc_recorder.cpp")
+        set_target_properties(${PROJECT_NAME}_recorder PROPERTIES PREFIX "")
+        target_link_libraries(${PROJECT_NAME}_recorder
+                ${PROJECT_NAME}
+                ${PROJECT_NAME}
+                ${OpenCV_LIBS}
+                )
+    endif()
+
 endif()
