@@ -207,12 +207,14 @@ if(BUILD_EXAMPLES)
 
 
     if(BUILD_APP)
+        find_package(Qt5 COMPONENTS Widgets REQUIRED)
         add_executable(${PROJECT_NAME}_recorder "${PROJECT_SOURCE_DIR}/examples/zed_oc_recorder.cpp")
         set_target_properties(${PROJECT_NAME}_recorder PROPERTIES PREFIX "")
         target_link_libraries(${PROJECT_NAME}_recorder
                 ${PROJECT_NAME}
                 ${PROJECT_NAME}
                 ${OpenCV_LIBS}
+                Qt5::Widgets
                 )
     endif()
 
